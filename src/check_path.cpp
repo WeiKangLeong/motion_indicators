@@ -6,6 +6,8 @@
 #include <pcl/point_types.h>
 #include <nav_msgs/Path.h>
 
+#define PI 3.14159265
+
 ros::Publisher pub;
 
 nav_msgs::Path stored_route;
