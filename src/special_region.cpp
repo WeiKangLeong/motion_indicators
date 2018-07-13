@@ -11,7 +11,7 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <visualization_msgs/Marker.h>
-#include <std_msgs/Int32.h>
+#include <std_msgs/UInt8.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/transforms.h>
@@ -26,8 +26,8 @@
 #define RESOLUTION 0.1
 
 //1 - right, 2 - left, 3 - dual, 0 - no
-#define left_turn 2
-#define right_turn 1
+#define left_turn 1
+#define right_turn 2
 #define no_turn 0
 #define dual_light 3
 
@@ -59,13 +59,15 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr path_indicators_(new pcl::PointCloud<pcl::P
 pcl::PointCloud<pcl::PointXYZI>::Ptr right_indicators_(new pcl::PointCloud<pcl::PointXYZI>);
 pcl::PointCloud<pcl::PointXYZI>::Ptr left_indicators_(new pcl::PointCloud<pcl::PointXYZI>);
 pcl::PointCloud<pcl::PointXYZI>::Ptr dual_indicators_(new pcl::PointCloud<pcl::PointXYZI>);
+pcl::PointCloud<pcl::PointXYZI>::Ptr no_indicators_(new pcl::PointCloud<pcl::PointXYZI>);
+
 //pcl::PointCloud<pcl::PointXYZI>::Ptr start_end_pose_(new pcl::PointCloud<pcl::PointXYZI>);
 
-std_msgs::Int32 three_indicators_;
+std_msgs::UInt8 three_indicators_;
 
 nav_msgs::Path path_received_;
 
-std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr >* route_station_;
+std::vector<pcl::PointCloud<pcl::PointXYZI> >* route_station_;
 std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr >* start_end_pose_;
 std::vector<string>* start_end_name_;
 
@@ -144,9 +146,10 @@ void store_path(const nav_msgs::Path new_path)
         double start_range = sqrt((input_start.x-st_x)*(input_start.x-st_x)+(input_start.y-st_y)*(input_start.y-st_y));
         double end_range = sqrt((input_end.x-ed_x)*(input_end.x-ed_x)+(input_end.y-ed_y)*(input_end.y-ed_y));
         cout<<"from start: "<<start_range<<" from end: "<<end_range<<endl;
+        cout<<"this path station: "<<route_station_->at(nosuke).size()<<endl;
         if (start_range<0.2 && end_range<0.2)
         {
-            path_indicators_ = route_station_->at(nosuke);
+            *path_indicators_ = route_station_->at(nosuke);
         }
 
     }
@@ -183,9 +186,10 @@ void check_region(const geometry_msgs::PoseWithCovarianceStamped amcl)
         double ind_x = path_indicators_->points[i].x;
         double ind_y = path_indicators_->points[i].y;
         double current_dist = sqrt((cur_x-ind_x)*(cur_x-ind_x) + (cur_y-ind_y)*(cur_y-ind_y));
-
+        cout<<"index "<<i<<" : "<<current_dist<<" current indicator: "<<int(three_indicators_.data)<<endl;
         if (current_dist<2.0)
         {
+
             if (three_indicators_.data == path_indicators_->points[i].intensity)
             {
                 three_indicators_.data=path_indicators_->points[i].intensity;
@@ -198,6 +202,7 @@ void check_region(const geometry_msgs::PoseWithCovarianceStamped amcl)
         }
     }
     blink(int(three_indicators_.data));
+    //cout<<"current indicator: "<<int(three_indicators_.data)<<endl;
 }
 
 string tildeExpand(const string& stringIn){
@@ -362,12 +367,13 @@ void loadIndicatorStation()
     }
     cout<<"route number: "<<start_end_name_->size()<<endl;
     //route_station_->resize(start_end_name_->size());
-    pcl::PointCloud<pcl::PointXYZI>::Ptr empty_cloud (new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PointCloud<pcl::PointXYZI> empty_cloud;
     for (int k=0; k<start_end_pose_->size(); k++)
     {
-        cout<<start_end_name_->at(k)<<" x: "<<start_end_pose_->at(k)->points[0].x<<" y: "<<start_end_pose_->at(k)->points[0].x<<endl;
-        cout<<start_end_name_->at(k)<<" x: "<<start_end_pose_->at(k)->points[1].x<<" y: "<<start_end_pose_->at(k)->points[1].x<<endl;
+        cout<<start_end_name_->at(k)<<" x: "<<start_end_pose_->at(k)->points[0].x<<" y: "<<start_end_pose_->at(k)->points[0].y<<endl;
+        cout<<start_end_name_->at(k)<<" x: "<<start_end_pose_->at(k)->points[1].x<<" y: "<<start_end_pose_->at(k)->points[1].y<<endl;
         route_station_->push_back(empty_cloud);
+        //route_station_->resize(start_end_name_->size());
     }
 
 
@@ -421,8 +427,8 @@ void loadIndicatorStation()
                         indicator_point.y = (getMapBound()[1] - position_y_pixel - offset_y)*resolution_;
                         indicator_point.z = 0.0;
                         indicator_point.intensity = right_turn;
-                        store_indicators_->push_back(indicator_point);
-                        route_station_->at(momo)->push_back(indicator_point);
+                        //right_indicators_->push_back(indicator_point);
+                        route_station_->at(momo).push_back(indicator_point);
                         stop_line_id ++;
                         cout<<indicator_point.x<<" "<<indicator_point.y<<endl;
                         break;
@@ -467,8 +473,8 @@ void loadIndicatorStation()
                         indicator_point.y = (getMapBound()[1] - position_y_pixel - offset_y)*resolution_;
                         indicator_point.z = 0.0;
                         indicator_point.intensity = left_turn;
-                        store_indicators_->push_back(indicator_point);
-                        route_station_->at(momo)->push_back(indicator_point);
+                        //left_indicators_->push_back(indicator_point);
+                        route_station_->at(momo).push_back(indicator_point);
                         stop_line_id ++;
                         cout<<indicator_point.x<<" "<<indicator_point.y<<endl;
                         break;
@@ -512,8 +518,8 @@ void loadIndicatorStation()
                         indicator_point.y = (getMapBound()[1] - position_y_pixel - offset_y)*resolution_;
                         indicator_point.z = 0.0;
                         indicator_point.intensity = no_turn;
-                        store_indicators_->push_back(indicator_point);
-                        route_station_->at(momo)->push_back(indicator_point);
+                        //no_indicators_->push_back(indicator_point);
+                        route_station_->at(momo).push_back(indicator_point);
                         stop_line_id ++;
                         cout<<indicator_point.x<<" "<<indicator_point.y<<endl;
                         break;
@@ -522,6 +528,7 @@ void loadIndicatorStation()
             }
         }
     }
+
     cout <<"Number of stop lines: "<<stop_line_id<<endl;
 
 }
@@ -546,6 +553,9 @@ void loadSvgFile()
             start_right_->clear();
 	    store_brake_->clear();
             store_indicators_->clear();
+            right_indicators_->clear();
+            left_indicators_->clear();
+            no_indicators_->clear();
             loadIndicatorStation();
 	}
 
@@ -555,7 +565,7 @@ int main(int argc, char** argv){
 	
 	ros::Subscriber sub_pose = nh.subscribe("input", 1, check_region);
         ros::Subscriber sub_route = nh.subscribe("/iMiev/route_plan", 1, store_path);
-        pub_indicators = nh.advertise<std_msgs::Int32>("/indicators_light", 1);
+        pub_indicators = nh.advertise<std_msgs::UInt8>("/indicators_light", 1);
         pub_visualizer = nh.advertise<visualization_msgs::Marker>("/indicators_visualizer", 1);
 
         tfl_ = new tf::TransformListener();
@@ -566,7 +576,7 @@ int main(int argc, char** argv){
         end_right_ = new std::vector<std::vector<double>* >;
         store_brake_ = new std::vector<std::vector<double>* >;
         station_name_ = new std::vector<std::string>;
-        route_station_ = new std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr >;
+        route_station_ = new std::vector<pcl::PointCloud<pcl::PointXYZI> >;
         start_end_pose_ = new std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr >;
         start_end_name_ = new std::vector<string>;
 
