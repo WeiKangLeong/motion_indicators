@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   pcl_ros
   visualization_msgs
+  pnc_msgs
 )
 
 find_package(TinyXML REQUIRED)
@@ -25,13 +26,14 @@ find_package(TinyXML REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp tf nav_msgs sensor_msgs 
+  CATKIN_DEPENDS roscpp tf nav_msgs sensor_msgs pnc_msgs
   DEPENDS TinyXML
 #  DEPENDS system_lib
 )
 
 include_directories(
  include
+ ~/hans/delft/devel/include
   ${catkin_INCLUDE_DIRS} ${TinyXML_INCLUDE_DIRS}
 )
 
@@ -51,3 +53,8 @@ src/SvgPath.cpp
 
 add_executable(special_region src/special_region.cpp)
 target_link_libraries(special_region ${catkin_LIBRARIES} ${TINYXML_LIBRARIES} ${CURL_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${PROJECT_NAME})
+
+add_executable (path_loop src/path_loop.cpp)
+
+target_link_libraries(path_loop ${catkin_LIBRARIES} ${PROJECT_NAME})
+

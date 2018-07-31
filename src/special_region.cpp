@@ -129,7 +129,7 @@ void store_path(const nav_msgs::Path new_path)
     path_received_ = new_path;
     path_indicators_->clear();
     three_indicators_.data = 0;
-    pub_indicators.publish(three_indicators_);
+    //pub_indicators.publish(three_indicators_);
 
     pcl::PointXYZ input_start, input_end;
     input_start.x = path_received_.poses[0].pose.position.x;

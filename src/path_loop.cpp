@@ -11,20 +11,28 @@
 ros::Publisher pub, pub_next_goal;
 
 bool path_received_;
-double dist_next_goal_;
+double dist_next_goal_ = 6.0;
 std::vector<int>* store_loop_;
 int count;
 
 void move_cb (const pnc_msgs::move_status to_goal)
 {
-    if (path_received_)
+    if (path_received_) //&& count<=store_loop_->size())
     {
-        double dist_goal = to_goal.dist_to_goal.data;
+        double dist_goal = double(to_goal.dist_to_goal);
+        std::cout<<dist_goal<<std::endl;
+//        std_msgs::Int32 first_data;
+//        first_data.data = 12;
+//        pub_next_goal.publish(12);
         if (dist_goal<dist_next_goal_)
         {
             std_msgs::Int32 new_loop;
             new_loop.data = store_loop_->at(count);
+            std::cout<<"waiting for 5.0 seconds"<<std::endl;
+            ros::Duration(5.0).sleep();
+
             pub_next_goal.publish(new_loop);
+            std::cout<<"publish new path"<<std::endl;
             path_received_=false;
             count++;
         }
@@ -51,6 +59,23 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
   pub.publish (output);
 }
 
+void send_msg ()
+{
+    std::cout<<"going to publish"<<std::endl;
+    std_msgs::Int32 first_data;
+    first_data.data = store_loop_->at(count);
+
+//    for (int i=0; i<100; i++)
+//    {
+      pub_next_goal.publish(first_data);
+      //std::cout<<"publishing "<<first_data<<std::endl;
+//    }
+
+      count++;
+    std::cout<<"published"<<std::endl;
+    //pub_next_goal.publish()
+}
+
 int
 main (int argc, char** argv)
 {
@@ -60,21 +85,49 @@ main (int argc, char** argv)
 
   path_received_ = false;
 
+
+  //ros::Rate t(1000);
+
+
   // Create a ROS subscriber for the input point cloud
-  ros::Subscriber sub = nh.subscribe <pnc_mgs::move_status>("/iMiev/move_status", 1, move_cb);
-  ros::Subscriber sub_path = nh.subscribe <nav_msgs::Path> ("/iMiev/route_plan", 1, receive_path_cb);
+  ros::Subscriber sub = nh.subscribe <pnc_msgs::move_status>("/iMiev/move_status", 1, move_cb);
+  ros::Subscriber sub_path = nh.subscribe <nav_msgs::Path> ("/iMiev/route_plan", 1, path_receive_cb);
 
   // Create a ROS publisher for the output point cloud
   pub = nh.advertise<sensor_msgs::PointCloud2> ("output", 1);
-  pub_next_goal = nh.advertise<std_msgs::Int32> ("station_sequence", 1);
+  pub_next_goal = nh.advertise<std_msgs::Int32> ("/iMiev/station_sequence", 1000);
+
+    ros::Duration(5.0).sleep();
+
+
+      //send_msg();
 
   store_loop_ = new std::vector<int>;
+
+  /*
   store_loop_->push_back(1);
   store_loop_->push_back(12);
   store_loop_->push_back(23);
   store_loop_->push_back(34);
+  store_loop_->push_back(43);
+  store_loop_->push_back(35);
+  store_loop_->push_back(56);
+  store_loop_->push_back(67);
+  */
+
+  store_loop_->push_back(4);
+  store_loop_->push_back(49);
+  store_loop_->push_back(95);
+  store_loop_->push_back(56);
+  store_loop_->push_back(65);
+  store_loop_->push_back(57);
+  store_loop_->push_back(78);
+  store_loop_->push_back(83);
+
 
   count=0;
+
+  send_msg();
 
   // Spin
   ros::spin ();
