@@ -104,16 +104,16 @@ main (int argc, char** argv)
 
   store_loop_ = new std::vector<int>;
 
-  /*
+  
   store_loop_->push_back(1);
   store_loop_->push_back(12);
   store_loop_->push_back(23);
   store_loop_->push_back(34);
   store_loop_->push_back(43);
   store_loop_->push_back(35);
-  store_loop_->push_back(56);
+  store_loop_->push_back(56);/*
   store_loop_->push_back(67);
-  */
+  
 
   store_loop_->push_back(4);
   store_loop_->push_back(49);
@@ -122,7 +122,7 @@ main (int argc, char** argv)
   store_loop_->push_back(65);
   store_loop_->push_back(57);
   store_loop_->push_back(78);
-  store_loop_->push_back(83);
+  store_loop_->push_back(83);*/
 
 
   count=0;
