@@ -1,8 +1,0 @@
-<launch>
-	<node pkg="motion_indicators" type="special_region" name="indicators" output="screen">
-		<remap from="input" to="/iMiev/amcl_pose" />
-		<remap from="/indicators_light" to="/blinker" />
-	</node>
-	
-	<node pkg="rosserial_python" type="serial_node.py" name="arduino_blinker" args="/dev/ttyACM0" />
-</launch>
