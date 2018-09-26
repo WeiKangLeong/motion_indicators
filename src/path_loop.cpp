@@ -111,11 +111,11 @@ main (int argc, char** argv)
   store_loop_->push_back(34);
   store_loop_->push_back(43);
   store_loop_->push_back(35);
-  store_loop_->push_back(56);/*
+  store_loop_->push_back(56);
   store_loop_->push_back(67);
   
 
-  store_loop_->push_back(4);
+  /*store_loop_->push_back(4);
   store_loop_->push_back(49);
   store_loop_->push_back(95);
   store_loop_->push_back(56);
