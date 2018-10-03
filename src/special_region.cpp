@@ -189,6 +189,7 @@ void check_region(const geometry_msgs::PoseWithCovarianceStamped amcl)
             else
             {
                 three_indicators_.data=path_indicators_->points[i].intensity;
+                std::cout<<"publish indicator: "<<three_indicators_.data<<std::endl;
                 pub_indicators.publish(three_indicators_);
             }
         }
