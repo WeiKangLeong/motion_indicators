@@ -73,19 +73,11 @@ std::vector<string>* start_end_name_;
 
 void blink(int state)
 {
-    tf::StampedTransform latest_odom_transform;
-    try{
-        tfl_->lookupTransform("/iMiev/map", "/iMiev/odom", ros::Time(0), latest_odom_transform);
-    }
-    catch(tf::TransformException &ex){
-        ROS_ERROR_STREAM("odom transform failed");
-        return;
-    }
 
     //tf::Vector3 car_center = latest_odom_transform.getOrigin();
 
     visualization_msgs::Marker line_list;
-    line_list.header.frame_id =  "/iMiev/map";
+    line_list.header.frame_id =  "/iMiev/base_link";
     line_list.ns = "warning_light";
     line_list.action = 3;
     line_list.type = visualization_msgs::Marker::LINE_LIST;
@@ -103,19 +95,19 @@ void blink(int state)
 
     switch (state) {
         case left_turn:
-            pcl_ros::transformPointCloud(*left_indicators_, *around_car, latest_odom_transform);
-            for (int k=0; k<around_car->size(); k++)
+            //pcl_ros::transformPointCloud(*left_indicators_, *around_car, latest_odom_transform);
+            for (int k=0; k<left_indicators_->size(); k++)
             {
-                light_pt.x = around_car->points[k].x;
-                light_pt.y = around_car->points[k].y;
+                light_pt.x = left_indicators_->points[k].x;
+                light_pt.y = left_indicators_->points[k].y;
                 line_list.points.push_back(light_pt);
             }break;
         case right_turn:
-            pcl_ros::transformPointCloud(*right_indicators_, *around_car, latest_odom_transform);
-            for (int k=0; k<around_car->size(); k++)
+            //pcl_ros::transformPointCloud(*right_indicators_, *around_car, latest_odom_transform);
+            for (int k=0; k<right_indicators_->size(); k++)
             {
-                light_pt.x = around_car->points[k].x;
-                light_pt.y = around_car->points[k].y;
+                light_pt.x = right_indicators_->points[k].x;
+                light_pt.y = right_indicators_->points[k].y;
                 line_list.points.push_back(light_pt);
             }break;
     }
