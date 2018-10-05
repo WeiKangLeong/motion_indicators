@@ -178,7 +178,7 @@ void check_region(const geometry_msgs::PoseWithCovarianceStamped amcl)
         double ind_x = path_indicators_->points[i].x;
         double ind_y = path_indicators_->points[i].y;
         double current_dist = sqrt((cur_x-ind_x)*(cur_x-ind_x) + (cur_y-ind_y)*(cur_y-ind_y));
-        cout<<"index "<<i<<" : "<<current_dist<<" current indicator: "<<int(three_indicators_.data)<<endl;
+        //cout<<"index "<<i<<" : "<<current_dist<<" current indicator: "<<int(three_indicators_.data)<<endl;
         if (current_dist<2.0)
         {
 
