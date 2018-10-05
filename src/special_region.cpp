@@ -120,7 +120,7 @@ void store_path(const nav_msgs::Path new_path)
 {
     path_received_ = new_path;
     path_indicators_->clear();
-    three_indicators_.data = 0;
+    //three_indicators_.data = 0;
     //pub_indicators.publish(three_indicators_);
 
     pcl::PointXYZ input_start, input_end;
@@ -137,8 +137,8 @@ void store_path(const nav_msgs::Path new_path)
         double ed_y = start_end_pose_->at(nosuke)->points[1].y;
         double start_range = sqrt((input_start.x-st_x)*(input_start.x-st_x)+(input_start.y-st_y)*(input_start.y-st_y));
         double end_range = sqrt((input_end.x-ed_x)*(input_end.x-ed_x)+(input_end.y-ed_y)*(input_end.y-ed_y));
-        cout<<"from start: "<<start_range<<" from end: "<<end_range<<endl;
-        cout<<"this path station: "<<route_station_->at(nosuke).size()<<endl;
+        //cout<<"from start: "<<start_range<<" from end: "<<end_range<<endl;
+        //cout<<"this path station: "<<route_station_->at(nosuke).size()<<endl;
         if (start_range<0.2 && end_range<0.2)
         {
             *path_indicators_ = route_station_->at(nosuke);
@@ -178,11 +178,11 @@ void check_region(const geometry_msgs::PoseWithCovarianceStamped amcl)
         double ind_x = path_indicators_->points[i].x;
         double ind_y = path_indicators_->points[i].y;
         double current_dist = sqrt((cur_x-ind_x)*(cur_x-ind_x) + (cur_y-ind_y)*(cur_y-ind_y));
-        //cout<<"index "<<i<<" : "<<current_dist<<" current indicator: "<<int(three_indicators_.data)<<endl;
+        cout<<"index "<<i<<" : "<<current_dist<<" current indicator: "<<int(three_indicators_.data)<<endl;
         if (current_dist<2.0)
         {
-
-            if (three_indicators_.data == path_indicators_->points[i].intensity)
+            std::cout<<int(three_indicators_.data)<<std::endl;
+            if ((three_indicators_.data) == path_indicators_->points[i].intensity)
             {
                 three_indicators_.data=path_indicators_->points[i].intensity;
             }
