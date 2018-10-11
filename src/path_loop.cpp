@@ -14,6 +14,24 @@ bool path_received_;
 double dist_next_goal_ = 6.0;
 std::vector<int>* store_loop_;
 int count;
+int sequence_, path_number_;
+
+void send_msg ()
+{
+    std::cout<<"going to publish"<<std::endl;
+    std_msgs::Int32 first_data;
+    first_data.data = store_loop_->at(count);
+
+//    for (int i=0; i<100; i++)
+//    {
+      pub_next_goal.publish(first_data);
+      //std::cout<<"publishing "<<first_data<<std::endl;
+//    }
+
+      count++;
+    std::cout<<"published"<<std::endl;
+    //pub_next_goal.publish()
+}
 
 void move_cb (const pnc_msgs::move_status to_goal)
 {
@@ -31,10 +49,29 @@ void move_cb (const pnc_msgs::move_status to_goal)
             std::cout<<"waiting for 5.0 seconds"<<std::endl;
             ros::Duration(5.0).sleep();
 
-            pub_next_goal.publish(new_loop);
-            std::cout<<"publish new path"<<std::endl;
-            path_received_=false;
-            count++;
+            if (count<path_number_)
+            {
+                pub_next_goal.publish(new_loop);
+                std::cout<<"publish new path"<<std::endl;
+                path_received_=false;
+                count++;
+            }
+            else if (count==path_number_)
+            {
+                std::cout<<"restart or Enter to exit? ( r / e )"<<std::endl;
+                std::string choice;
+                std::cin>>choice;
+                if (choice=="r")
+                {
+                    count=0;
+                    send_msg();
+                }
+                else
+                {
+                    return;
+                }
+            }
+
         }
     }
 
@@ -59,22 +96,7 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
   pub.publish (output);
 }
 
-void send_msg ()
-{
-    std::cout<<"going to publish"<<std::endl;
-    std_msgs::Int32 first_data;
-    first_data.data = store_loop_->at(count);
 
-//    for (int i=0; i<100; i++)
-//    {
-      pub_next_goal.publish(first_data);
-      //std::cout<<"publishing "<<first_data<<std::endl;
-//    }
-
-      count++;
-    std::cout<<"published"<<std::endl;
-    //pub_next_goal.publish()
-}
 
 int
 main (int argc, char** argv)
@@ -82,6 +104,10 @@ main (int argc, char** argv)
   // Initialize ROS
   ros::init (argc, argv, "path_loop");
   ros::NodeHandle nh;
+  ros::NodeHandle priv_nh ("~");
+
+  priv_nh.getParam("sequence", sequence_);
+  priv_nh.getParam("path_number", path_number_);
 
   path_received_ = false;
 
@@ -90,21 +116,58 @@ main (int argc, char** argv)
 
 
   // Create a ROS subscriber for the input point cloud
-  ros::Subscriber sub = nh.subscribe <pnc_msgs::move_status>("/iMiev/move_status", 1, move_cb);
-  ros::Subscriber sub_path = nh.subscribe <nav_msgs::Path> ("/iMiev/route_plan", 1, path_receive_cb);
+  ros::Subscriber sub = nh.subscribe <pnc_msgs::move_status>("move_status", 1, move_cb);
+  ros::Subscriber sub_path = nh.subscribe <nav_msgs::Path> ("route_plan", 1, path_receive_cb);
 
   // Create a ROS publisher for the output point cloud
   pub = nh.advertise<sensor_msgs::PointCloud2> ("output", 1);
-  pub_next_goal = nh.advertise<std_msgs::Int32> ("/iMiev/station_sequence", 1000);
+  pub_next_goal = nh.advertise<std_msgs::Int32> ("station_sequence", 1000);
 
-    ros::Duration(5.0).sleep();
+    //ros::Duration(5.0).sleep();
 
 
       //send_msg();
+    int divider=0;
+    divider = pow(10, path_number_);
+    std::cout<<divider<<std::endl;
 
   store_loop_ = new std::vector<int>;
 
-  
+  if (path_number_==0 || sequence_==0)
+  {
+      return 0;
+  }
+  else if (sequence_/divider == 0)
+  {
+
+      for (int i=0; i<path_number_-1; i++)
+      {
+          int remainder = 0;
+          int remainder_2 = 0;
+          int path = 0;
+          int send_goal = path_number_-i;
+          divider = pow(10, send_goal);
+          remainder = sequence_/divider;
+          remainder_2 = sequence_-remainder*divider;
+          send_goal= send_goal-1;
+          divider = pow(10, send_goal);
+          remainder_2 = remainder_2/divider;
+          path = remainder*10 + remainder_2;
+          store_loop_->push_back(path);
+
+          sequence_ = sequence_ - remainder*(pow(10, send_goal+1));
+
+          std::cout<<path<<std::endl;
+          std::cout<<sequence_<<std::endl;
+      }
+
+      std::cout<<sequence_/divider<<std::endl;
+  }
+  else
+  {
+      std::cout<<sequence_/divider<<std::endl;
+  }
+ /*
   store_loop_->push_back(1);
   store_loop_->push_back(12);
   store_loop_->push_back(23);
@@ -114,7 +177,7 @@ main (int argc, char** argv)
   store_loop_->push_back(56);
   store_loop_->push_back(67);
   
-
+*/
   /*store_loop_->push_back(4);
   store_loop_->push_back(49);
   store_loop_->push_back(95);
