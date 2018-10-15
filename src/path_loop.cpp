@@ -14,7 +14,7 @@ bool path_received_;
 double dist_next_goal_ = 6.0;
 std::vector<int>* store_loop_;
 int count;
-int sequence_, path_number_;
+int path_number_, sequence_, starting_order_;
 
 void send_msg ()
 {
@@ -106,8 +106,9 @@ main (int argc, char** argv)
   ros::NodeHandle nh;
   ros::NodeHandle priv_nh ("~");
 
-  priv_nh.getParam("sequence", sequence_);
+  priv_nh.getParam("path_sequence", sequence_);
   priv_nh.getParam("path_number", path_number_);
+  priv_nh.getParam("starting_station", starting_order_);
 
   path_received_ = false;
 
@@ -127,46 +128,57 @@ main (int argc, char** argv)
 
 
       //send_msg();
-    int divider=0;
-    divider = pow(10, path_number_);
-    std::cout<<divider<<std::endl;
 
   store_loop_ = new std::vector<int>;
+
+  int store_path = sequence_;
+
+  std::vector<int> store_station_reverse;
+  std::vector<int> store_station;
+
+  while (store_path>0)
+  {
+      int temp_store_path = store_path/10;
+
+      int station_number = store_path - temp_store_path*10;
+      store_station_reverse.push_back(station_number);
+      store_path = temp_store_path;
+      //std::cout<<station_number<<std::endl;
+  }
+
+  //std::cout<<store_station_reverse.size()<<std::endl;
+
+  for (int k=1; k<store_station_reverse.size()+1; k++)
+  {
+      int placement = store_station_reverse.size()-k;
+      //std::cout<<"store_station_reverse.size()-k: "<<placement<<std::endl;
+      int new_place = store_station_reverse.at(placement);
+      //std::cout<<new_place<<std::endl;
+      store_station.push_back(new_place);
+      //std::cout<<store_station.at(k-1)<<std::endl;
+  }
+
 
   if (path_number_==0 || sequence_==0)
   {
       return 0;
   }
-  else if (sequence_/divider == 0)
-  {
-
-      for (int i=0; i<path_number_-1; i++)
-      {
-          int remainder = 0;
-          int remainder_2 = 0;
-          int path = 0;
-          int send_goal = path_number_-i;
-          divider = pow(10, send_goal);
-          remainder = sequence_/divider;
-          remainder_2 = sequence_-remainder*divider;
-          send_goal= send_goal-1;
-          divider = pow(10, send_goal);
-          remainder_2 = remainder_2/divider;
-          path = remainder*10 + remainder_2;
-          store_loop_->push_back(path);
-
-          sequence_ = sequence_ - remainder*(pow(10, send_goal+1));
-
-          std::cout<<path<<std::endl;
-          std::cout<<sequence_<<std::endl;
-      }
-
-      std::cout<<sequence_/divider<<std::endl;
-  }
   else
   {
-      std::cout<<sequence_/divider<<std::endl;
+      store_loop_->push_back(starting_order_*10+store_station.at(0));
+      for (int i=0; i<store_station.size()-1; i++)
+      {
+          store_loop_->push_back(store_station.at(i)*10 + store_station.at(i+1));
+
+      }
+
   }
+
+  for (int l=0; l<store_loop_->size(); l++)
+  {
+      std::cout<<store_loop_->at(l)<<std::endl;
+  }
+
  /*
   store_loop_->push_back(1);
   store_loop_->push_back(12);

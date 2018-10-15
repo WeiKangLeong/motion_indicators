@@ -14,8 +14,8 @@
 		<remap from = "route_plan" to="iMiev/route_plan" />
 		<remap from = "station_sequence" to ="iMiev/station_sequence" />
 		<param name = "path_number" value = "8" />
-		<param name= "starting_station" value= "0" />
 		<param name= "path_sequence" value= "12343567" />
+		<param name= "starting_station" value= "0" />
 	</node>
 
 </launch>
