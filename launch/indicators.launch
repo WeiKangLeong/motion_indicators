@@ -10,12 +10,12 @@
 	<!-- launch path loop -->
 
 	<node pkg="motion_indicators" type="path_loop" name="path_loop" output="screen">
-		<remap from = "move_status" to="iMiev/move_status" />
-		<remap from = "route_plan" to="iMiev/route_plan" />
-		<remap from = "station_sequence" to ="iMiev/station_sequence" />
-		<param name = "path_number" value = "8" />
+		<remap from = "move_status" to="move_status" />
+		<remap from = "route_plan" to="route_plan" />
+		<remap from = "station_sequence" to ="station_sequence" />
+		<param name = "path_number" value = "4" />
 		<param name= "starting_station" value= "0" />
-		<param name= "path_sequence" value= "12343567" />
+		<param name= "path_sequence" value= "101" />
 	</node>
 
 </launch>

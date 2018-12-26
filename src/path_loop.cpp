@@ -11,7 +11,7 @@
 ros::Publisher pub, pub_next_goal;
 
 bool path_received_;
-double dist_next_goal_ = 6.0;
+double dist_next_goal_ = 8.0;
 std::vector<int>* store_loop_;
 int count;
 int path_number_, sequence_, starting_order_;
@@ -38,19 +38,21 @@ void move_cb (const pnc_msgs::move_status to_goal)
     if (path_received_) //&& count<=store_loop_->size())
     {
         double dist_goal = double(to_goal.dist_to_goal);
-        std::cout<<dist_goal<<std::endl;
+//        std::cout<<dist_goal<<std::endl;
 //        std_msgs::Int32 first_data;
 //        first_data.data = 12;
 //        pub_next_goal.publish(12);
         if (dist_goal<dist_next_goal_)
         {
+		std::cout<<"count: "<<count<<" path_number: "<<path_number_<<std::endl;
             std_msgs::Int32 new_loop;
-            new_loop.data = store_loop_->at(count);
-            std::cout<<"waiting for 5.0 seconds"<<std::endl;
-            ros::Duration(5.0).sleep();
+            
+            std::cout<<"waiting for 3.0 seconds"<<std::endl;
+            ros::Duration(3.0).sleep();
 
             if (count<path_number_)
             {
+		new_loop.data = store_loop_->at(count);
                 pub_next_goal.publish(new_loop);
                 std::cout<<"publish new path"<<std::endl;
                 path_received_=false;
@@ -64,6 +66,7 @@ void move_cb (const pnc_msgs::move_status to_goal)
                 if (choice=="r")
                 {
                     count=0;
+			path_received_=false;
                     send_msg();
                 }
                 else
@@ -124,7 +127,7 @@ main (int argc, char** argv)
   pub = nh.advertise<sensor_msgs::PointCloud2> ("output", 1);
   pub_next_goal = nh.advertise<std_msgs::Int32> ("station_sequence", 1000);
 
-    //ros::Duration(5.0).sleep();
+    ros::Duration(5.0).sleep();
 
 
       //send_msg();
